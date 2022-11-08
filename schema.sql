@@ -16,3 +16,5 @@ CREATE TABLE song (
     Audio_path VARCHAR(256) NOT NULL,
     FOREIGN KEY (penyanyi_id) REFERENCES user (user_id) ON DELETE CASCADE
 );
+
+INSERT INTO user VALUES (1, 'admin@gmail.com', '$2y$10$DVwuawj2W0iigY8zl/4JI.TT.Bb2GcV6D2B2ipz79va49Xmv.O1qm', 'admin', 'Admin', true);

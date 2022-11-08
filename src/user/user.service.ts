@@ -20,6 +20,13 @@ export class UserService {
         return this.userRepository.find();
     }
 
+    findUserByUsername(username: string): Promise<User[]> {
+        return this.userRepository
+        .createQueryBuilder()
+        .where('username = :username', { username })
+        .getMany();
+    }
+
     updateUser(id: string, user: any): Promise<any> {
         return this.userRepository
         .createQueryBuilder()

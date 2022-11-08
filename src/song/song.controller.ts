@@ -1,5 +1,4 @@
-import { Controller, Post, Body, Get, Put, Delete, Param, Req} from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Post, Body, Get, Put, Delete, Param } from '@nestjs/common';
 import { SongService } from './song.service';
 import { Song } from './song.entity';
 
@@ -17,7 +16,7 @@ export class SongController {
     }
 
     @Get()
-    async findAllSong(@Req() request: Request) {
+    async findAllSong() {
         const Song: Array<Song> = await this.songService.findAllSong();
         return Song;
     }

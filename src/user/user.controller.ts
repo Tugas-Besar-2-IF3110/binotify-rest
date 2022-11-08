@@ -1,5 +1,4 @@
-import { Controller, Post, Body, Get, Put, Delete, Param, Req} from '@nestjs/common';
-import { Request } from 'express';
+import { Controller, Post, Body, Get, Put, Delete, Param } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 
@@ -17,9 +16,14 @@ export class UserController {
     }
 
     @Get()
-    async findAllUser(@Req() request: Request) {
+    async findAllUser() {
         const user: Array<User> = await this.userService.findAllUser();
         return user;
+    }
+
+    @Get('check-username/:username')
+    async findUserByUsername(@Param('username') username: string) {
+        return await this.userService.findUserByUsername(username);
     }
 
     @Put(':id')
