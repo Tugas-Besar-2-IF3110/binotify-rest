@@ -8,29 +8,28 @@ export class UserController {
     constructor(private userService: UserService) {}
     
     @Post()
-    async create(@Body() user: any) {
-        const newUser = await this.userService.create(user);
+    async createUser(@Body() user: any) {
+        const newUser = await this.userService.createUser(user);
         if(!newUser) {
-            return 'error in creating user';
+            return 'Error in creating user';
         }
-        return 'user created successfully';
+        return newUser;
     }
 
     @Get()
-    async findAll(@Req() request: Request) {
-        const user: Array<User> = await this.userService.findAll();
-        return user
+    async findAllUser(@Req() request: Request) {
+        const user: Array<User> = await this.userService.findAllUser();
+        return user;
     }
 
     @Put(':id')
-    async update(@Param('id') id: string, @Body() body: any) {
-        const newUser: any = await this.userService.update(id, body);
-        return "user updated";
+    async updateUser(@Param('id') id: string, @Body() body: any) {
+        const newUser: any = await this.userService.updateUser(id, body);
+        return newUser;
     }
 
     @Delete(':id')
-    async remove(@Param('id') id: string) {
-        await this.userService.delete(id);
-        return "user deleted";
+    async deleteUser(@Param('id') id: string) {
+        return await this.userService.deleteUser(id);
     }
 }

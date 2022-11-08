@@ -10,17 +10,17 @@ export class UserService {
         private userRepository: Repository<User>
     ) {}
 
-    create(user: any): Promise<any> {
+    createUser(user: any): Promise<any> {
         return this.userRepository.save(
           this.userRepository.create(user)
         );
-      }
+    }
 
-    findAll(): Promise<User[]> {
+    findAllUser(): Promise<User[]> {
         return this.userRepository.find();
-      }
+    }
 
-    update(id: string, user: any): Promise<any> {
+    updateUser(id: string, user: any): Promise<any> {
         return this.userRepository
         .createQueryBuilder()
         .update()
@@ -31,9 +31,9 @@ export class UserService {
         })
         .where(`user_id = :id`, { id })
         .execute()
-      }
+    }
 
-    delete(id: string): Promise<any> {
+    deleteUser(id: string): Promise<any> {
         return this.userRepository
         .createQueryBuilder()
         .delete()
