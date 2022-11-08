@@ -27,6 +27,13 @@ export class UserService {
         .getMany();
     }
 
+    findUserByEmail(email: string): Promise<User[]> {
+        return this.userRepository
+        .createQueryBuilder()
+        .where('email = :email', { email })
+        .getMany();
+    }
+
     updateUser(id: string, user: any): Promise<any> {
         return this.userRepository
         .createQueryBuilder()

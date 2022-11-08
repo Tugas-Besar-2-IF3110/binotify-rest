@@ -23,7 +23,22 @@ export class UserController {
 
     @Get('check-username/:username')
     async findUserByUsername(@Param('username') username: string) {
-        return await this.userService.findUserByUsername(username);
+        const regex = new RegExp('^[a-zA-Z0-9_]+$');
+        if (regex.test(username)) {
+            return await this.userService.findUserByUsername(username);
+        } else {
+            return await Promise.resolve({"error": "Username harus berupa gabungan alphabet, angka, dan underscore"});
+        }
+    }
+
+    @Get('check-email/:email')
+    async findUserByEmail(@Param('email') email: string) {
+        const regex = new RegExp('^[a-zA-Z0-9.!#$%&’*+=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$');
+        if (regex.test(email)) {
+            return await this.userService.findUserByEmail(email);
+        } else {
+            return await Promise.resolve({"error": "Email tidak valid"});
+        }
     }
 
     @Put(':id')
