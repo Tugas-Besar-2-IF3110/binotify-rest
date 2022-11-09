@@ -1,6 +1,8 @@
 import { Controller, Post, Body, Get, Put, Delete, Param } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 
 @Controller('user')
 export class UserController {
@@ -8,10 +10,12 @@ export class UserController {
     
     @Post()
     async createUser(@Body() user: any) {
+        user.password = await bcrypt.hash(user.password, 10);
         const newUser = await this.userService.createUser(user);
         if(!newUser) {
             return 'Error in creating user';
         }
+        newUser.token = jwt.sign({userId: newUser.user_id, isAdmin: newUser.isAdmin}, process.env.JWT_SECRET_KEY);
         return newUser;
     }
 
@@ -22,7 +26,7 @@ export class UserController {
     }
 
     @Get('check-username/:username')
-    async findUserByUsername(@Param('username') username: string) {
+    async checkUserByUsername(@Param('username') username: string) {
         const regex = new RegExp('^[a-zA-Z0-9_]+$');
         if (regex.test(username)) {
             return await this.userService.findUserByUsername(username);
@@ -32,7 +36,7 @@ export class UserController {
     }
 
     @Get('check-email/:email')
-    async findUserByEmail(@Param('email') email: string) {
+    async checkUserByEmail(@Param('email') email: string) {
         const regex = new RegExp('^[a-zA-Z0-9.!#$%&’*+=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$');
         if (regex.test(email)) {
             return await this.userService.findUserByEmail(email);
