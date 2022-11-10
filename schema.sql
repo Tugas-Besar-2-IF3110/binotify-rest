@@ -17,4 +17,4 @@ CREATE TABLE song (
     FOREIGN KEY (penyanyi_id) REFERENCES user (user_id) ON DELETE CASCADE
 );
 
-INSERT INTO user VALUES (1, 'admin@gmail.com', '$2y$10$DVwuawj2W0iigY8zl/4JI.TT.Bb2GcV6D2B2ipz79va49Xmv.O1qm', 'admin', 'Admin', true);
+INSERT INTO user VALUES (1, 'admin@gmail.com', '$2b$10$.PUUBeF8W.2lwoBeEIQt5uWCSwrY34gbhL8i1.UvSxsRsKW8tWX2C', 'admin', 'Admin', true);

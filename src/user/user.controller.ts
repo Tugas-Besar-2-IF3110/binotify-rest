@@ -8,8 +8,8 @@ import * as jwt from 'jsonwebtoken';
 export class UserController {
     constructor(private userService: UserService) {}
     
-    @Post()
-    async createUser(@Body() user: any) {
+    @Post('register')
+    async register(@Body() user: any) {
         user.password = await bcrypt.hash(user.password, 10);
         const newUser = await this.userService.createUser(user);
         if(!newUser) {
@@ -17,6 +17,18 @@ export class UserController {
         }
         newUser.token = jwt.sign({userId: newUser.user_id, isAdmin: newUser.isAdmin}, process.env.JWT_SECRET_KEY);
         return newUser;
+    }
+
+    @Post('login')
+    async login(@Body() user: any) {
+        const getUser: any = await this.userService.findUserByUsername(user.username);
+        if (getUser) {
+            if (bcrypt.compare(user.password, getUser.password)) {
+                getUser.token = jwt.sign({userId: getUser.user_id, isAdmin: getUser.isAdmin}, process.env.JWT_SECRET_KEY);
+                return getUser;
+            }
+        }
+        return await Promise.resolve({"error": "Invalid username or password"});
     }
 
     @Get()
