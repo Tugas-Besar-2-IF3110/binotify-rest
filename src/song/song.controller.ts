@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Get, Put, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put, Delete, Param, Req } from '@nestjs/common';
 import { SongService } from './song.service';
 import { Song } from './song.entity';
+import * as jwt from 'jsonwebtoken';
 
 @Controller('song')
 export class SongController {
@@ -15,10 +16,20 @@ export class SongController {
         return newSong;
     }
 
+    @Get('all')
+    async findAllSong(@Req() req: any) {
+        return await this.songService.findAllSong();
+    }
+
     @Get()
-    async findAllSong() {
-        const Song: Array<Song> = await this.songService.findAllSong();
-        return Song;
+    async findSongByPenyanyi(@Req() req: any) {
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            const token: string = req.headers.authorization.split(' ')[1];
+            const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
+            return await this.songService.findSongByPenyanyiId(decodedToken.userId);
+        } else {
+            return await Promise.resolve({"error": "Unauthorized"});
+        }
     }
 
     @Put(':id')

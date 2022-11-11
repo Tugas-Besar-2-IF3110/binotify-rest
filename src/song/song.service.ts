@@ -20,6 +20,13 @@ export class SongService {
         return this.songRepository.find();
     }
 
+    findSongByPenyanyiId(id: string): Promise<Song[]> {
+        return this.songRepository
+        .createQueryBuilder()
+        .where('penyanyi_id = :id', { id })
+        .getMany();
+    }
+
     updateSong(id: string, song: any): Promise<any> {
         return this.songRepository
         .createQueryBuilder()
