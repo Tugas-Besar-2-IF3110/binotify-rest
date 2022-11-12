@@ -44,7 +44,7 @@ export class SongController {
         return await this.songService.findAllSong();
     }
 
-    @Get('/:audioFile')
+    @Get('audio_files/:audioFile')
     async serveAvatar(@Param('audioFile') audioFile: string, @Res() res: any): Promise<any> {
         res.sendFile(audioFile, { root: 'audio_files'});
     }
