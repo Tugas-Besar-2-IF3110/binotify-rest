@@ -45,7 +45,7 @@ export class SongController {
     }
 
     @Get('audio_files/:audioFile')
-    async serveAvatar(@Param('audioFile') audioFile: string, @Res() res: any): Promise<any> {
+    async findAudioFile(@Param('audioFile') audioFile: string, @Res() res: any): Promise<any> {
         res.sendFile(audioFile, { root: 'audio_files'});
     }
 
@@ -61,10 +61,64 @@ export class SongController {
         return await Promise.resolve({"error": "Unauthorized"});
     }
 
-    @Put(':id')
-    async updateSong(@Param('id') id: string, @Body() body: any) {
-        const newSong: any = await this.songService.updateSong(id, body);
-        return newSong;
+    @Get(':id')
+    async findSongById(@Req() req: any, @Param('id') id: string) {
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            const token: string = req.headers.authorization.split(' ')[1];
+            try {
+                const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
+                const song: Song = await this.songService.findSongBySongId(id);
+                if (song.penyanyi_id === decodedToken.userId) {
+                    return song;
+                }
+            } catch(e) {}
+        }
+        return await Promise.resolve({"error": "Unauthorized"});
+    }
+
+    @Put('title/:id')
+    async updateSongTitle(@Req() req: any, @Param('id') id: string, @Body() song_req: any) {
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            const token: string = req.headers.authorization.split(' ')[1];
+            try {
+                const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
+                const song: Song = await this.songService.findSongBySongId(id);
+                if (song.penyanyi_id === decodedToken.userId) {
+                    song_req.Audio_path = song.Audio_path;
+                    const newSong: any = await this.songService.updateSong(id, song_req);
+                    return newSong;
+                }
+            } catch(e) {}
+        }
+        return await Promise.resolve({"error": "Unauthorized"});
+    }
+
+    @Put('all/:id')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: diskStorage({
+            destination: './audio_files', 
+            filename: (req, file, cb) => {
+                const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+                return cb(null, `${randomName}${extname(file.originalname)}`);
+            }
+        })
+    }))
+    async updateSong(@Req() req: any, @Param('id') id: string, @Body() song_req: any, @UploadedFile() file: any) {
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            const token: string = req.headers.authorization.split(' ')[1];
+            try {
+                const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
+                const song: Song = await this.songService.findSongBySongId(id);
+                if (song.penyanyi_id === decodedToken.userId) {
+                    fs.unlink(`${song.Audio_path}`, () => {});
+                    song_req.Audio_path = file.path;
+                    const newSong: any = await this.songService.updateSong(id, song_req);
+                    return newSong;
+                }
+            } catch(e) {}
+        }
+        fs.unlink(`${file.path}`, () => {});
+        return await Promise.resolve({"error": "Unauthorized"});
     }
 
     @Delete(':id')

@@ -27,13 +27,19 @@ export class SongService {
         .getMany();
     }
 
+    findSongBySongId(id: string): Promise<Song> {
+        return this.songRepository
+        .createQueryBuilder()
+        .where('song_id = :id', { id })
+        .getOne();
+    }
+
     updateSong(id: string, song: any): Promise<any> {
         return this.songRepository
         .createQueryBuilder()
         .update()
         .set({
             Judul: song.Judul,
-            penyanyi_id: song.penyanyi_id,
             Audio_path: song.Audio_path
         })
         .where(`song_id = :id`, { id })
