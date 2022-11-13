@@ -122,7 +122,18 @@ export class SongController {
     }
 
     @Delete(':id')
-    async deleteSong(@Param('id') id: string) {
-        return await this.songService.deleteSong(id);
+    async deleteSong(@Req() req: any, @Param('id') id: string) {
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            const token: string = req.headers.authorization.split(' ')[1];
+            try {
+                const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
+                const song: Song = await this.songService.findSongBySongId(id);
+                if (song.penyanyi_id === decodedToken.userId) {
+                    fs.unlink(`${song.Audio_path}`, () => {});
+                    return await this.songService.deleteSong(id);
+                }
+            } catch(e) {}
+        }
+        return await Promise.resolve({"error": "Unauthorized"});
     }
 }
