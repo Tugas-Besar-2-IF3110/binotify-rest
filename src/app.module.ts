@@ -5,9 +5,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SongModule } from './song/song.module';
 import { UserModule } from './user/user.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
-  imports: [SongModule, UserModule,
+  imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -18,7 +19,10 @@ import { UserModule } from './user/user.module';
       database: process.env.DB_NAME,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: false
-    })
+    }),
+    UserModule,
+    SongModule, 
+    SubscriptionModule
   ],
   controllers: [AppController],
   providers: [AppService],
