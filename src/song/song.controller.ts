@@ -39,11 +39,6 @@ export class SongController {
         return await Promise.resolve({"error": "Unauthorized"});
     }
 
-    @Get('all')
-    async findAllSong() {
-        return await this.songService.findAllSong();
-    }
-
     @Get('audio_files/:audioFile')
     async findAudioFile(@Param('audioFile') audioFile: string, @Res() res: any): Promise<any> {
         res.sendFile(audioFile, { root: 'audio_files'});
@@ -57,6 +52,18 @@ export class SongController {
                 const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
                 return await this.songService.findSongByPenyanyiId(decodedToken.userId);
             } catch(e) {}
+        }
+        return await Promise.resolve({"error": "Unauthorized"});
+    }
+    
+    @Get('creator/:creatorId/subscriber/:subscriberId')
+    async findSongByCreatorAndSubscriber(@Req() req: any, @Param('creatorId') creatorId: string, @Param('subscriberId') subscriberId: string) {
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            const token: string = req.headers.authorization.split(' ')[1];
+            if (token === process.env.BINOTIFY_APP_API_KEY) {
+                const song: Array<Song> = await this.songService.findSongByPenyanyiId(creatorId);
+                return song;
+            }
         }
         return await Promise.resolve({"error": "Unauthorized"});
     }
