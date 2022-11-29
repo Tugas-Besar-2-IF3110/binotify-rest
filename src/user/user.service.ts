@@ -17,7 +17,11 @@ export class UserService {
     }
 
     findAllUser(): Promise<User[]> {
-        return this.userRepository.find();
+        return this.userRepository
+        .createQueryBuilder('penyanyi')
+        .where('isAdmin = false')
+        .select(['penyanyi.user_id', 'penyanyi.name'])
+        .getMany();
     }
 
     findUserByUsername(username: string): Promise<User> {
@@ -32,27 +36,5 @@ export class UserService {
         .createQueryBuilder()
         .where('email = :email', { email })
         .getOne();
-    }
-
-    updateUser(id: string, user: any): Promise<any> {
-        return this.userRepository
-        .createQueryBuilder()
-        .update()
-        .set({
-            email: user.email,
-            username: user.username,
-            name: user.name
-        })
-        .where(`user_id = :id`, { id })
-        .execute()
-    }
-
-    deleteUser(id: string): Promise<any> {
-        return this.userRepository
-        .createQueryBuilder()
-        .delete()
-        .from(User)
-        .where('user_id = :id', { id })
-        .execute()
     }
 }

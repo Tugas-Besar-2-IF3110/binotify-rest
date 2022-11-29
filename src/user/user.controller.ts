@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Put, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
@@ -32,9 +32,15 @@ export class UserController {
     }
 
     @Get()
-    async findAllUser() {
-        const user: Array<User> = await this.userService.findAllUser();
-        return user;
+    async findAllUser(@Req() req: any) {
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            const token: string = req.headers.authorization.split(' ')[1];
+            if (token === process.env.BINOTIFY_APP_API_KEY) {
+                const user: Array<User> = await this.userService.findAllUser();
+                return user;
+            }
+        }
+        return await Promise.resolve({"error": "Unauthorized"});
     }
 
     @Get('check-username/:username')
@@ -55,16 +61,5 @@ export class UserController {
         } else {
             return await Promise.resolve({"error": "Email tidak valid"});
         }
-    }
-
-    @Put(':id')
-    async updateUser(@Param('id') id: string, @Body() body: any) {
-        const newUser: any = await this.userService.updateUser(id, body);
-        return newUser;
-    }
-
-    @Delete(':id')
-    async deleteUser(@Param('id') id: string) {
-        return await this.userService.deleteUser(id);
     }
 }
