@@ -21,7 +21,7 @@ export class SubscriptionController {
                             '<soapenv:Body>' +
                             '<sub:listRequestSubscription>' +    
                                 '<request>' +
-                                    '<API_KEY></API_KEY>' +
+                                    '<API_KEY>' + process.env.API_KEY + '</API_KEY>' +
                                 '</request>' +
                             '</sub:listRequestSubscription>' +
                             '</soapenv:Body>' +
@@ -50,6 +50,7 @@ export class SubscriptionController {
                             '<soapenv:Body>' +
                             '<sub:approveOrRejectSubscription>' +    
                                 '<request>' +
+                                    '<API_KEY>' + process.env.API_KEY + '</API_KEY>' +
                                     '<creatorId>' + subscription.creatorId + '</creatorId>' +
                                     '<subscriberId>' + subscription.subscriberId + '</subscriberId>' +
                                     '<approve>' + subscription.approve + '</approve>' +
