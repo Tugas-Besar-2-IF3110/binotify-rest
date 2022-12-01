@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+  web:
+    build:
+      context: .
+    container_name: BINOTIFY_REST
+    ports:
+      - 5000:5000
+    tty: true
+    env_file: 
+      - /.env
+    depends_on:
+      - db
+  db:
+    build:
+      context: ./docker_db
+    environment:
+      MYSQL_ROOT_PASSWORD: habede
+      MYSQL_DATABASE: habede_rest
+      MYSQL_USER: habede
+      MYSQL_PASSWORD: habede
+    container_name: BINOTIFY_REST_DB
+    ports:
+      - "3308:3306"
+    tty: true
