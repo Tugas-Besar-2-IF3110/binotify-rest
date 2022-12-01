@@ -6,6 +6,8 @@ import * as fs from 'fs';
 import { SongService } from './song.service';
 import { Song } from './song.entity';
 import * as jwt from 'jsonwebtoken';
+import axios from 'axios';
+import { xml2json } from 'xml-js';
 
 @Controller('song')
 export class SongController {
@@ -57,15 +59,43 @@ export class SongController {
     }
     
     @Get('creator/:creatorId/subscriber/:subscriberId')
-    async findSongByCreatorAndSubscriber(@Req() req: any, @Param('creatorId') creatorId: string, @Param('subscriberId') subscriberId: string) {
+    async findSongByCreatorAndSubscriber(@Req() req: any, @Param('creatorId') creatorId: string, @Param('subscriberId') subscriberId: string, @Res() res: any) {
         if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
             const token: string = req.headers.authorization.split(' ')[1];
             if (token === process.env.BINOTIFY_APP_API_KEY) {
-                const song: Array<Song> = await this.songService.findSongByPenyanyiId(creatorId);
-                return song;
+                let subscribed = false;
+                await axios.post(`${process.env.BINOTIFY_SOAP_API}/subscription`,
+                    `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sub="http://subscription.binotify/">\
+                        <soapenv:Header/>\
+                        <soapenv:Body>\
+                        <sub:validateSubscription>\
+                            <request>\
+                                <API_KEY>${process.env.API_KEY}</API_KEY>\
+                                <creatorId>${creatorId}</creatorId>\
+                                <subscriberId>${subscriberId}</subscriberId>\
+                            </request>\
+                        </sub:validateSubscription>\
+                        </soapenv:Body>\
+                    </soapenv:Envelope>`, {
+                        headers: {
+                            'Content-Type': 'text/xml'
+                        }
+                    }                    
+                ).then(response => {
+                    const data = JSON.parse(xml2json(response.data, { spaces: 2, compact: true }));
+                    subscribed = JSON.parse(data["S:Envelope"]["S:Body"]["ns2:validateSubscriptionResponse"]["return"]["subscribed"]._text);
+                });
+                if (subscribed) {
+                    res.send(await this.songService.findSongByPenyanyiId(creatorId))
+                } else {
+                    res.send(await Promise.resolve({"error": "Unauthorized"}));
+                }
+            } else {
+                res.send(await Promise.resolve({"error": "Unauthorized"}));
             }
+        } else {
+            res.send(await Promise.resolve({"error": "Unauthorized"}));
         }
-        return await Promise.resolve({"error": "Unauthorized"});
     }
 
     @Get(':id')
