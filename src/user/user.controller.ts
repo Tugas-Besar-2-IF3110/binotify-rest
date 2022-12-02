@@ -50,6 +50,18 @@ export class UserController {
         return await Promise.resolve({"error": "Unauthorized"});
     }
 
+    @Post('admin')
+    async findAdmin(@Req() req: any) {
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            const token: string = req.headers.authorization.split(' ')[1];
+            if (token === process.env.BINOTIFY_SOAP_API_KEY) {
+                const user: User = await this.userService.findAdmin();
+                return user;
+            }
+        }
+        return await Promise.resolve({"error": "Unauthorized"});
+    }
+
     @Get('check-username/:username')
     async checkUserByUsername(@Param('username') username: string) {
         const regex = new RegExp('^[a-zA-Z0-9_]+$');

@@ -24,6 +24,13 @@ export class UserService {
         .getMany();
     }
 
+    findAdmin(): Promise<User> {
+        return this.userRepository
+        .createQueryBuilder()
+        .where('isAdmin = true')
+        .getOne();
+    }
+
     findUserByUsername(username: string): Promise<User> {
         return this.userRepository
         .createQueryBuilder()
