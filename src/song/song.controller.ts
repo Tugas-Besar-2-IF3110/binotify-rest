@@ -30,11 +30,10 @@ export class SongController {
                 const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
                 song.penyanyi_id = decodedToken.userId;
                 song.Audio_path = file.path;
-                const newSong = await this.songService.createSong(song);
-                if(!newSong) {
-                    return 'Error in creating song';
+                if (song.Judul) {
+                    const newSong = await this.songService.createSong(song);
+                    return newSong;
                 }
-                return newSong;
             } catch(e) {}
         }
         fs.unlink(`${file.path}`, () => {});
@@ -122,8 +121,10 @@ export class SongController {
                 const song: Song = await this.songService.findSongBySongId(id);
                 if (song.penyanyi_id === decodedToken.userId) {
                     song_req.Audio_path = song.Audio_path;
-                    const newSong: any = await this.songService.updateSong(id, song_req);
-                    return newSong;
+                    if (song_req.Judul) {
+                        const newSong: any = await this.songService.updateSong(id, song_req);
+                        return newSong;
+                    }
                 }
             } catch(e) {}
         }
@@ -149,8 +150,10 @@ export class SongController {
                 if (song.penyanyi_id === decodedToken.userId) {
                     fs.unlink(`${song.Audio_path}`, () => {});
                     song_req.Audio_path = file.path;
-                    const newSong: any = await this.songService.updateSong(id, song_req);
-                    return newSong;
+                    if (song_req.Judul) {
+                        const newSong: any = await this.songService.updateSong(id, song_req);
+                        return newSong;
+                    }
                 }
             } catch(e) {}
         }
