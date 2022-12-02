@@ -1,12 +1,13 @@
-import { Controller, Post, Body, Get, Param, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Req, Inject, CACHE_MANAGER } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { Cache } from 'cache-manager';
 
 @Controller('user')
 export class UserController {
-    constructor(private userService: UserService) {}
+    constructor(private userService: UserService, @Inject(CACHE_MANAGER) private cacheManager: Cache) {}
     
     @Post('register')
     async register(@Body() user: any) {
@@ -36,8 +37,14 @@ export class UserController {
         if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
             const token: string = req.headers.authorization.split(' ')[1];
             if (token === process.env.BINOTIFY_APP_API_KEY) {
-                const user: Array<User> = await this.userService.findAllUser();
-                return user;
+                let penyanyi: any = await this.cacheManager.get('penyanyi');
+                if (penyanyi) {
+                    return JSON.parse(penyanyi);
+                } else {
+                    const user: Array<User> = await this.userService.findAllUser();
+                    await this.cacheManager.set('penyanyi', JSON.stringify(user), 86400);
+                    return user;
+                }
             }
         }
         return await Promise.resolve({"error": "Unauthorized"});

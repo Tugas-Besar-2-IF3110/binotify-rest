@@ -3,6 +3,7 @@ import { SubscriptionService } from './subscription.service';
 import * as jwt from 'jsonwebtoken';
 import axios from 'axios';
 import { xml2json } from 'xml-js';
+import e from 'express';
 
 @Controller('subscription')
 export class SubscriptionController {
@@ -16,25 +17,31 @@ export class SubscriptionController {
                 const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
                 if (decodedToken.isAdmin) {
                     await axios.post(`${process.env.BINOTIFY_SOAP_API}/subscription`, 
-                        '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sub="http://subscription.binotify/">' +
-                            '<soapenv:Header/>' +
-                            '<soapenv:Body>' +
-                            '<sub:listRequestSubscription>' +    
-                                '<request>' +
-                                    '<API_KEY></API_KEY>' +
-                                '</request>' +
-                            '</sub:listRequestSubscription>' +
-                            '</soapenv:Body>' +
-                        '</soapenv:Envelope>', {
+                        `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sub="http://subscription.binotify/">\
+                            <soapenv:Header/>\
+                            <soapenv:Body>\
+                            <sub:listRequestSubscription>\
+                                <request>\
+                                    <API_KEY>${process.env.API_KEY}</API_KEY>\
+                                </request>\
+                            </sub:listRequestSubscription>\
+                            </soapenv:Body>\
+                        </soapenv:Envelope>`, {
                         headers: {
                             'Content-Type': 'text/xml'
                         }
                     }).then(response => {
                         res.send(xml2json(response.data, { spaces: 2, compact: true }));
-                    })}
-            } catch(e) {}
+                    });
+                } else {
+                    res.send(await Promise.resolve({"error": "Unauthorized"}));
+                }
+            } catch(e) {
+                res.send(await Promise.resolve({"error": "Unauthorized"}));
+            }
+        } else {
+            res.send(await Promise.resolve({"error": "Unauthorized"}));
         }
-        return await Promise.resolve({"error": "Unauthorized"});
     }
 
     @Post('accept_or_reject')
@@ -45,26 +52,33 @@ export class SubscriptionController {
                 const decodedToken: any = jwt.verify(token, process.env.JWT_SECRET_KEY);
                 if (decodedToken.isAdmin) {
                     await axios.post(`${process.env.BINOTIFY_SOAP_API}/subscription`, 
-                        '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sub="http://subscription.binotify/">' +
-                            '<soapenv:Header/>' +
-                            '<soapenv:Body>' +
-                            '<sub:approveOrRejectSubscription>' +    
-                                '<request>' +
-                                    '<creatorId>' + subscription.creatorId + '</creatorId>' +
-                                    '<subscriberId>' + subscription.subscriberId + '</subscriberId>' +
-                                    '<approve>' + subscription.approve + '</approve>' +
-                                '</request>' +
-                            '</sub:approveOrRejectSubscription>' +
-                            '</soapenv:Body>' +
-                        '</soapenv:Envelope>', {
+                        `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sub="http://subscription.binotify/">\
+                            <soapenv:Header/>\
+                            <soapenv:Body>\
+                            <sub:approveOrRejectSubscription>\
+                                <request>\
+                                    <API_KEY>${process.env.API_KEY}</API_KEY>\
+                                    <creatorId>${subscription.creatorId}</creatorId>\
+                                    <subscriberId>${subscription.subscriberId}</subscriberId>\
+                                    <approve>${subscription.approve}</approve>\
+                                </request>\
+                            </sub:approveOrRejectSubscription>\
+                            </soapenv:Body>\
+                        </soapenv:Envelope>`, {
                         headers: {
                             'Content-Type': 'text/xml'
                         }
                     }).then(response => {
                         res.send(xml2json(response.data, { spaces: 2, compact: true }));
-                    })}
-            } catch(e) {}
+                    });
+                } else {
+                    res.send(await Promise.resolve({"error": "Unauthorized"}));
+                }
+            } catch(e) {
+                res.send(await Promise.resolve({"error": "Unauthorized"}));
+            }
+        } else {
+            res.send(await Promise.resolve({"error": "Unauthorized"}));
         }
-        return await Promise.resolve({"error": "Unauthorized"});
     }
 }

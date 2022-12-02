@@ -16,10 +16,6 @@ export class SongService {
         );
     }
 
-    findAllSong(): Promise<Song[]> {
-        return this.songRepository.find();
-    }
-
     findSongByPenyanyiId(id: string): Promise<Song[]> {
         return this.songRepository
         .createQueryBuilder()
