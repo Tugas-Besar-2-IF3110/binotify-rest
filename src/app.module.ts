@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, CacheModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -22,7 +22,10 @@ import { SubscriptionModule } from './subscription/subscription.module';
     }),
     UserModule,
     SongModule, 
-    SubscriptionModule
+    SubscriptionModule,
+    CacheModule.register({
+      isGlobal: true
+    })
   ],
   controllers: [AppController],
   providers: [AppService],
