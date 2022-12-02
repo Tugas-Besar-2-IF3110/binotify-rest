@@ -56,7 +56,7 @@ export class UserController {
             const token: string = req.headers.authorization.split(' ')[1];
             if (token === process.env.BINOTIFY_SOAP_API_KEY) {
                 const user: User = await this.userService.findAdmin();
-                return user;
+                return user.email;
             }
         }
         return await Promise.resolve({"error": "Unauthorized"});

@@ -26,8 +26,9 @@ export class UserService {
 
     findAdmin(): Promise<User> {
         return this.userRepository
-        .createQueryBuilder()
+        .createQueryBuilder('admin')
         .where('isAdmin = true')
+        .select('admin.email')
         .getOne();
     }
 
